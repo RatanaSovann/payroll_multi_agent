@@ -1,0 +1,579 @@
+{
+  "metadata": {
+    "run_id": "20260712_054308",
+    "started_at_utc": "2026-07-12T05:43:08.331170+00:00",
+    "input_file": "data/raw/payroll_data.csv",
+    "input_sha256": "c6121935136db2f556e33a15e0d26b4579e54f27a2ebe0b0e0c254f5cb9c39fd",
+    "input_rows": 900,
+    "input_columns": [
+      "employee_id",
+      "name",
+      "state",
+      "department",
+      "employment_type",
+      "period_number",
+      "pay_period_start",
+      "pay_period_end",
+      "pay_date",
+      "gross_wage",
+      "super_paid",
+      "expected_sg",
+      "payg_withheld",
+      "correct_payg",
+      "sg_compliant",
+      "sg_shortfall",
+      "payg_deviation_pct",
+      "payg_flagged"
+    ],
+    "pipeline_version": "v11-awards-audit"
+  },
+  "completed_at_utc": "2026-07-12T05:45:46.948973+00:00",
+  "total_events": 10,
+  "events_by_category": {
+    "PIPELINE": 1,
+    "LLM_DECISION": 3,
+    "RULE_APPLIED": 2,
+    "CALCULATION": 4
+  },
+  "events": [
+    {
+      "seq": 1,
+      "timestamp": "2026-07-12T05:43:08.332214+00:00",
+      "category": "PIPELINE",
+      "agent": "orchestrator",
+      "action": "run_started",
+      "detail": {
+        "run_id": "20260712_054308",
+        "started_at_utc": "2026-07-12T05:43:08.331170+00:00",
+        "input_file": "data/raw/payroll_data.csv",
+        "input_sha256": "c6121935136db2f556e33a15e0d26b4579e54f27a2ebe0b0e0c254f5cb9c39fd",
+        "input_rows": 900,
+        "input_columns": [
+          "employee_id",
+          "name",
+          "state",
+          "department",
+          "employment_type",
+          "period_number",
+          "pay_period_start",
+          "pay_period_end",
+          "pay_date",
+          "gross_wage",
+          "super_paid",
+          "expected_sg",
+          "payg_withheld",
+          "correct_payg",
+          "sg_compliant",
+          "sg_shortfall",
+          "payg_deviation_pct",
+          "payg_flagged"
+        ],
+        "pipeline_version": "v11-awards-audit"
+      }
+    },
+    {
+      "seq": 2,
+      "timestamp": "2026-07-12T05:43:10.821152+00:00",
+      "category": "LLM_DECISION",
+      "agent": "data_validator",
+      "action": "schema_mapping",
+      "detail": {
+        "model": "claude-haiku-4-5-20251001",
+        "decision": {
+          "mapping": {
+            "employee_id": "employee_id",
+            "name": "name",
+            "state": "state",
+            "department": "department",
+            "employment_type": "employment_type",
+            "period_number": "UNMAPPED",
+            "pay_period_start": "UNMAPPED",
+            "pay_period_end": "UNMAPPED",
+            "pay_date": "pay_date",
+            "gross_wage": "gross_wage",
+            "super_paid": "super_paid",
+            "expected_sg": "expected_sg",
+            "payg_withheld": "payg_withheld",
+            "correct_payg": "correct_payg",
+            "sg_compliant": "UNMAPPED",
+            "sg_shortfall": "UNMAPPED",
+            "payg_deviation_pct": "UNMAPPED",
+            "payg_flagged": "UNMAPPED"
+          },
+          "confidence": "HIGH",
+          "merge_notes": "No merging required. All canonical columns are present with direct mappings. Additional columns (period_number, pay_period_start, pay_period_end, sg_compliant, sg_shortfall, payg_deviation_pct, payg_flagged) are compliance-related derived fields not in the core canonical schema."
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "note": "Non-deterministic step \u2014 decision recorded verbatim for review"
+      }
+    },
+    {
+      "seq": 3,
+      "timestamp": "2026-07-12T05:43:22.620960+00:00",
+      "category": "LLM_DECISION",
+      "agent": "award_classifier",
+      "action": "award_classification",
+      "detail": {
+        "model": "claude-haiku-4-5-20251001",
+        "decision": {
+          "Customer Service": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          },
+          "Finance": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          },
+          "HR": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          },
+          "IT": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          },
+          "Operations": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          },
+          "Sales": {
+            "award_code": "UNKNOWN",
+            "level": 1,
+            "confidence": "LOW"
+          }
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "note": "Non-deterministic step \u2014 decision recorded verbatim for review"
+      }
+    },
+    {
+      "seq": 4,
+      "timestamp": "2026-07-12T05:43:28.353104+00:00",
+      "category": "RULE_APPLIED",
+      "agent": "compliance_analyst",
+      "action": "sg_rounding_tolerance",
+      "detail": {
+        "threshold": 0.001,
+        "rationale": "Excludes sub-0.1% differences caused by floating point rounding in payroll systems"
+      }
+    },
+    {
+      "seq": 5,
+      "timestamp": "2026-07-12T05:43:28.356968+00:00",
+      "category": "CALCULATION",
+      "agent": "compliance_analyst",
+      "action": "sg_underpayment_total",
+      "detail": {
+        "formula": "SUM(expected_sg - super_paid) WHERE super_paid < expected_sg * (1 - tolerance); expected_sg = gross_wage * 0.12",
+        "inputs": {
+          "rows_checked": 900,
+          "rows_flagged": 198,
+          "sg_rate": 0.12,
+          "tolerance": 0.001
+        },
+        "result": 37899.42,
+        "regulatory_basis": "Superannuation Guarantee (Administration) Act 1992 \u2014 SG rate 12% of OTE, FY2025-26",
+        "evidence_sample": [
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-01-16",
+            "gross_wage": 964.8,
+            "expected_sg": 115.78,
+            "super_paid": 63.76,
+            "sg_shortfall": 52.02
+          },
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-01-30",
+            "gross_wage": 1012.09,
+            "expected_sg": 121.45,
+            "super_paid": 71.65,
+            "sg_shortfall": 49.8
+          },
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-02-13",
+            "gross_wage": 1038.93,
+            "expected_sg": 124.67,
+            "super_paid": 81.8,
+            "sg_shortfall": 42.87
+          },
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-02-27",
+            "gross_wage": 993.59,
+            "expected_sg": 119.23,
+            "super_paid": 80.77,
+            "sg_shortfall": 38.46
+          },
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-03-13",
+            "gross_wage": 1006.31,
+            "expected_sg": 120.76,
+            "super_paid": 56.47,
+            "sg_shortfall": 64.29
+          },
+          {
+            "employee_id": "EMP0005",
+            "pay_date": "2026-03-27",
+            "gross_wage": 971.71,
+            "expected_sg": 116.61,
+            "super_paid": 84.28,
+            "sg_shortfall": 32.33
+          },
+          {
+            "employee_id": "EMP0006",
+            "pay_date": "2026-01-16",
+            "gross_wage": 1587.14,
+            "expected_sg": 190.46,
+            "super_paid": 0.0,
+            "sg_shortfall": 190.46
+          },
+          {
+            "employee_id": "EMP0006",
+            "pay_date": "2026-01-30",
+            "gross_wage": 1615.04,
+            "expected_sg": 193.8,
+            "super_paid": 0.0,
+            "sg_shortfall": 193.8
+          },
+          {
+            "employee_id": "EMP0006",
+            "pay_date": "2026-02-13",
+            "gross_wage": 1663.67,
+            "expected_sg": 199.64,
+            "super_paid": 0.0,
+            "sg_shortfall": 199.64
+          },
+          {
+            "employee_id": "EMP0006",
+            "pay_date": "2026-02-27",
+            "gross_wage": 1634.36,
+            "expected_sg": 196.12,
+            "super_paid": 0.0,
+            "sg_shortfall": 196.12
+          }
+        ],
+        "evidence_note": null
+      }
+    },
+    {
+      "seq": 6,
+      "timestamp": "2026-07-12T05:43:28.368963+00:00",
+      "category": "RULE_APPLIED",
+      "agent": "compliance_analyst",
+      "action": "payg_deviation_threshold",
+      "detail": {
+        "threshold": 15.0,
+        "rationale": "Selected after sensitivity analysis at 5/10/15/20% \u2014 excludes rounding noise while capturing material variances. NOTE: correct_payg may be enriched via simplified flat brackets (no LITO/Medicare) \u2014 see enrichment audit entries."
+      }
+    },
+    {
+      "seq": 7,
+      "timestamp": "2026-07-12T05:43:28.369977+00:00",
+      "category": "CALCULATION",
+      "agent": "compliance_analyst",
+      "action": "payg_inconsistency_exposure",
+      "detail": {
+        "formula": "SUM(ABS(payg_withheld - correct_payg)) WHERE ABS(payg_withheld - correct_payg) / correct_payg > threshold_pct/100",
+        "inputs": {
+          "rows_checked": 876,
+          "rows_flagged": 47,
+          "threshold_pct": 15.0
+        },
+        "result": 20296.88,
+        "regulatory_basis": "ITAA 1997 / ATO PAYG withholding schedules (simplified bracket approximation)",
+        "evidence_sample": [
+          {
+            "employee_id": "EMP0007",
+            "pay_date": "2026-02-13",
+            "gross_wage": 3166.93,
+            "payg_withheld": 847.82,
+            "correct_payg": 1029.25,
+            "deviation_pct": 17.6,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0007",
+            "pay_date": "2026-02-27",
+            "gross_wage": 3276.56,
+            "payg_withheld": 1388.69,
+            "correct_payg": 1064.88,
+            "deviation_pct": 30.4,
+            "payg_status": "Over-withheld"
+          },
+          {
+            "employee_id": "EMP0007",
+            "pay_date": "2026-03-27",
+            "gross_wage": 3145.09,
+            "payg_withheld": 810.65,
+            "correct_payg": 1022.15,
+            "deviation_pct": 20.7,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0028",
+            "pay_date": "2026-01-16",
+            "gross_wage": 7459.68,
+            "payg_withheld": 4056.43,
+            "correct_payg": 3356.86,
+            "deviation_pct": 20.8,
+            "payg_status": "Over-withheld"
+          },
+          {
+            "employee_id": "EMP0028",
+            "pay_date": "2026-01-30",
+            "gross_wage": 7185.61,
+            "payg_withheld": 2167.91,
+            "correct_payg": 3233.52,
+            "deviation_pct": 33.0,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0028",
+            "pay_date": "2026-02-13",
+            "gross_wage": 7348.13,
+            "payg_withheld": 2290.65,
+            "correct_payg": 3306.66,
+            "deviation_pct": 30.7,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0028",
+            "pay_date": "2026-02-27",
+            "gross_wage": 7740.05,
+            "payg_withheld": 4499.81,
+            "correct_payg": 3483.02,
+            "deviation_pct": 29.2,
+            "payg_status": "Over-withheld"
+          },
+          {
+            "employee_id": "EMP0028",
+            "pay_date": "2026-03-13",
+            "gross_wage": 7779.51,
+            "payg_withheld": 2103.69,
+            "correct_payg": 3500.78,
+            "deviation_pct": 39.9,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0042",
+            "pay_date": "2026-01-16",
+            "gross_wage": 7086.81,
+            "payg_withheld": 2646.61,
+            "correct_payg": 3189.06,
+            "deviation_pct": 17.0,
+            "payg_status": "Under-withheld"
+          },
+          {
+            "employee_id": "EMP0042",
+            "pay_date": "2026-01-30",
+            "gross_wage": 6768.87,
+            "payg_withheld": 1683.77,
+            "correct_payg": 2504.48,
+            "deviation_pct": 32.8,
+            "payg_status": "Under-withheld"
+          }
+        ],
+        "evidence_note": null
+      }
+    },
+    {
+      "seq": 8,
+      "timestamp": "2026-07-12T05:43:28.398655+00:00",
+      "category": "CALCULATION",
+      "agent": "compliance_analyst",
+      "action": "missing_casual_super_shortfall",
+      "detail": {
+        "formula": "SUM(expected_sg - super_paid) per casual employee WHERE super_paid = 0 AND gross_wage > 0, aggregated across all pay periods",
+        "inputs": {
+          "casual_rows_checked": 312,
+          "employees_flagged": 16
+        },
+        "result": 20350.23,
+        "regulatory_basis": "SGAA 1992 \u2014 $450/month threshold removed 1 July 2022; all casuals SG-eligible",
+        "evidence_sample": [
+          {
+            "employee_id": "EMP0006",
+            "name": "Connie Lawrence",
+            "state": "ACT",
+            "department": "Finance",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1169.64,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1169.64
+          },
+          {
+            "employee_id": "EMP0013",
+            "name": "Lisa Hensley",
+            "state": "TAS",
+            "department": "IT",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 697.52,
+            "total_super_paid": 0.0,
+            "total_shortfall": 697.52
+          },
+          {
+            "employee_id": "EMP0018",
+            "name": "Derek Zuniga",
+            "state": "SA",
+            "department": "Customer Service",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 2001.75,
+            "total_super_paid": 0.0,
+            "total_shortfall": 2001.75
+          },
+          {
+            "employee_id": "EMP0019",
+            "name": "Lisa Jackson",
+            "state": "VIC",
+            "department": "IT",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1493.51,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1493.51
+          },
+          {
+            "employee_id": "EMP0024",
+            "name": "Tommy Walter",
+            "state": "TAS",
+            "department": "Finance",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1558.5,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1558.5
+          },
+          {
+            "employee_id": "EMP0033",
+            "name": "Tricia Valencia",
+            "state": "SA",
+            "department": "Customer Service",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 973.8000000000001,
+            "total_super_paid": 0.0,
+            "total_shortfall": 973.8
+          },
+          {
+            "employee_id": "EMP0035",
+            "name": "Debra Davidson",
+            "state": "SA",
+            "department": "IT",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1741.25,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1741.25
+          },
+          {
+            "employee_id": "EMP0043",
+            "name": "Sherry Decker",
+            "state": "QLD",
+            "department": "HR",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1296.09,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1296.09
+          },
+          {
+            "employee_id": "EMP0045",
+            "name": "Angelica Tucker",
+            "state": "WA",
+            "department": "Customer Service",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 925.78,
+            "total_super_paid": 0.0,
+            "total_shortfall": 925.78
+          },
+          {
+            "employee_id": "EMP0059",
+            "name": "Brent Jordan",
+            "state": "NT",
+            "department": "Finance",
+            "total_pay_runs": 6,
+            "breached_pay_runs": 6,
+            "total_super_owed": 1139.72,
+            "total_super_paid": 0.0,
+            "total_shortfall": 1139.72
+          }
+        ],
+        "evidence_note": null
+      }
+    },
+    {
+      "seq": 9,
+      "timestamp": "2026-07-12T05:43:31.006126+00:00",
+      "category": "CALCULATION",
+      "agent": "compliance_analyst",
+      "action": "award_underpayment_total",
+      "detail": {
+        "formula": "SUM((minimum_rate - effective_rate) * hours) WHERE effective_rate < minimum_rate * 0.999; minimum_rate = award_level_rate * (1.25 if casual else 1.0); effective_rate = hourly_rate OR gross_wage/hours_worked OR gross_wage/76",
+        "inputs": {
+          "rows_checked": 900,
+          "rows_flagged": 0,
+          "titles_covered": 0,
+          "titles_unknown": [
+            "Customer Service",
+            "Finance",
+            "HR",
+            "IT",
+            "Operations",
+            "Sales"
+          ],
+          "rates_effective": "1 July 2026 (FWC 2026 AWR, +4.75%; NMW $26.44/hr; casual loading 25%)"
+        },
+        "result": 0.0,
+        "regulatory_basis": "Fair Work Act 2009 \u2014 Modern Award minimum rates; FWC Annual Wage Review 2026",
+        "evidence_sample": [],
+        "evidence_note": null
+      }
+    },
+    {
+      "seq": 10,
+      "timestamp": "2026-07-12T05:44:16.858824+00:00",
+      "category": "LLM_DECISION",
+      "agent": "risk_assessor",
+      "action": "risk_scoring",
+      "detail": {
+        "model": "claude-haiku-4-5-20251001",
+        "decision": {
+          "risk_scores": {
+            "sg_underpayment": {
+              "score": "HIGH",
+              "rationale": "33 employees affected across 198 pay runs with $37,899 total shortfall. Exceeds $20k exposure threshold and affects >20 employees. SGC penalty exposure is material."
+            },
+            "payg_inconsistency": {
+              "score": "HIGH",
+              "rationale": "14 employees affected with $20,297 exposure and maximum deviation of 39.9% (well above 15% compliance threshold). Indicates systematic withholding control failure across departments with IT showing worst deviation at 39.9%."
+            },
+            "missing_casual_super": {
+              "score": "HIGH",
+              "rationale": "16 casual employees with $20,350 shortfall across 96 pay runs. All casuals are SG-eligible post-July 2022 with no earnings threshold. Combined with SG underpayment cohort creates elevated compliance risk."
+            }
+          },
+          "overall_risk_rating": "HIGH",
+          "estimated_sgc_penalty": 52847,
+          "rubric": "HIGH >$20k or >20 employees; MEDIUM $5-20k or 5-20 employees; LOW below"
+        },
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "note": "Non-deterministic step \u2014 decision recorded verbatim for review"
+      }
+    }
+  ]
+}
