@@ -5,7 +5,7 @@
 🔗 **Live demo:** https://YOUR-APP.streamlit.app *(2 runs per session — it runs on my personal API credits)*
 
 ![agents](https://img.shields.io/badge/agents-6-blue)
-![cost](https://img.shields.io/badge/cost%2Frun-~$0.05-green)
+![cost](https://img.shields.io/badge/cost%2Frun-~$0.20-green)
 ![rates](https://img.shields.io/badge/FWC%20rates-1%20July%202026-orange)
 ![python](https://img.shields.io/badge/python-3.11+-yellow)
 
