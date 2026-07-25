@@ -1,6 +1,6 @@
 # Payroll Compliance AI 🇦🇺
 
-**Six AI agents. Any payroll CSV in → findings report, interactive dashboard, and a full calculation audit trail out. ~90 seconds. ~$0.05 per run.**
+**Six AI agents. Any payroll CSV in → findings report, interactive dashboard, and a full calculation audit trail out. ~90 seconds. ~$0.20 per run.**
 
 🔗 **Live demo:** https://YOUR-APP.streamlit.app *(2 runs per session — it runs on my personal API credits)*
 
