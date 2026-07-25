@@ -2,7 +2,7 @@
 
 **Six AI agents. Any payroll CSV in → findings report, interactive dashboard, and a full calculation audit trail out. ~90 seconds. ~$0.20 per run.**
 
-🔗 **Live demo:** https://YOUR-APP.streamlit.app *(2 runs per session — it runs on my personal API credits)*
+🔗 **Live demo:** [https://payroll-compliance-ai.streamlit.app/](https://payroll-compliance-ai.streamlit.app/) *(2 runs per session — it runs on my personal API credits)*
 
 ![agents](https://img.shields.io/badge/agents-6-blue)
 ![cost](https://img.shields.io/badge/cost%2Frun-~$0.20-green)
@@ -104,4 +104,4 @@ src/agents/               # the six agents + base loop / token ledger
 
 ---
 
-*Built by **Ratana** ahead of joining EY People Advisory Services — Employment Taxes. Synthetic data only; rates current at 1 July 2026.*
+*Built by **Ratana Sovann** . Synthetic data only; rates current at 1 July 2026.*
