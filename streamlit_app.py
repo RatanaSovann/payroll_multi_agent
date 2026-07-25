@@ -67,6 +67,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# ── Markdown safety ───────────────────────────────────────────────────────────
+
+def md_safe(text: str) -> str:
+    """
+    Escape $ so Streamlit doesn't render text between two dollar amounts
+    as LaTeX math (e.g. "$44,500 ... $30,191" turns into italic math).
+    Applied to ALL LLM-generated text before st.markdown/info/warning.
+    """
+    return str(text).replace("$", "\\$") if text else text
+
+
 # ── Rate limiting ─────────────────────────────────────────────────────────────
 
 @st.cache_resource
@@ -363,9 +374,9 @@ def main():
     c5.metric("🎯 Overall Risk", overall)
 
     if risk.get("narrative"):
-        st.info(f"**Risk Assessment:** {risk['narrative']}")
+        st.info(f"**Risk Assessment:** {md_safe(risk['narrative'])}")
     if risk.get("highest_priority_action"):
-        st.warning(f"⚡ **Priority:** {risk['highest_priority_action']}")
+        st.warning(f"⚡ **Priority:** {md_safe(risk['highest_priority_action'])}")
 
     cov = awards.get("coverage", {})
     if cov.get("titles_unknown"):
@@ -384,7 +395,7 @@ def main():
         components.html(r["dashboard_html"], height=900, scrolling=True)
 
     with tab_report:
-        st.markdown(r["report"])
+        st.markdown(md_safe(r["report"]))
 
     with tab_audit:
         audit = r["audit"]
