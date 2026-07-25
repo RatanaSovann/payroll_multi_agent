@@ -61,6 +61,21 @@ findings.md      dashboard.html      + audit.json
 5. **Model tiering.** Haiku for structured tasks, Sonnet only where orchestration reliability or prose quality pays for itself. ~$0.05/run vs $3–5 naive.
 6. **Audit everything** ↓
 
+
+### Handling messy, real-world data
+ 
+Real payroll exports are never clean. A deterministic **cleaning stage** (zero tokens) runs inside Agent 1, after column mapping and before any math. Every action is logged to the audit trail.
+ 
+**Coercion & normalisation**
+- Money: `$4,000.00`, non-breaking-space amounts, European `1.234,56`, accounting negatives `(500)`, currency codes, percentages -> clean floats (Unicode NFKC normalised first, catching Excel smart-quotes and zero-width chars)
+- Employment type: `casual `/`CAS`/`temp`/`seasonal` -> `Casual` — critical, since the casual-super check is an exact match; unrecognised variants are flagged, not force-matched
+- States: full names -> codes; dates: mixed formats plus **Excel serial numbers** (`46037` -> real date)
+**Integrity checks**
+- Exact duplicate rows removed (prevents double-counted exposure)
+- Same employee_id + pay_date flagged for review but not auto-deleted (could be legitimate multi-line pays)
+- Impossible values caught: negative/zero gross, **super exceeding gross**
+**Quarantine, don't guess** — rows that can't be safely analysed (no employee ID, non-positive gross, impossible super) are excluded from all figures and reported separately with per-row evidence. A fabricated value could hide or invent an underpayment, so the pipeline refuses to guess. Dataset gets a HIGH/MEDIUM/LOW quality score; LOW fails validation.
+
 ### The audit trail (the differentiator)
 
 Every run emits `audit_<run>.json`: input file **SHA-256**, every **formula + inputs + result + regulatory basis (Act & section)**, row-level evidence, every threshold with its rationale, and every **LLM decision recorded verbatim** and flagged as the non-deterministic step.
