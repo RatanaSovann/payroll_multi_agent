@@ -15,6 +15,7 @@ import json
 import pandas as pd
 from .base_agent import BaseAgent
 from src.audit import AUDIT
+from src.data_cleaner import clean_dataframe
 
 # ── Canonical schema ───────────────────────────────────────────────────────────
 # These are the column names every downstream agent expects.
@@ -174,6 +175,15 @@ class DataValidatorAgent(BaseAgent):
         self._log("      🔧 Enriching missing canonical columns...")
         mapped_df = self._enrich_columns(mapped_df)
 
+        # ── Clean messy data (deterministic, fully audited) ────────────────────
+        self._log("      🧹 Cleaning data (type coercion, dedup, quarantine)...")
+        mapped_df, quality_report = clean_dataframe(mapped_df)
+        for iss in quality_report["issues"]:
+            self._log(f"      • {iss}")
+        self._log(f"      ✓ Data quality: {quality_report['quality_score']} "
+                  f"({quality_report['clean_rate_pct']}% analysable, "
+                  f"{quality_report['quarantined_rows']} quarantined)")
+
         # ── Step 3: Validation ─────────────────────────────────────────────────
         self._log("      📋 Validating data quality...")
 
@@ -230,7 +240,8 @@ class DataValidatorAgent(BaseAgent):
         )
 
         validation = {
-            "validation_passed":  len(missing_cols) == 0,
+            "data_quality":       quality_report,
+            "validation_passed":  len(missing_cols) == 0 and quality_report["quality_score"] != "LOW",
             "issues":             issues,
             "stats":              stats,
             "column_mapping":     column_mapping,
