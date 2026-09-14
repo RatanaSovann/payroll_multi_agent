@@ -1,4 +1,0 @@
-employee_id,name,state,department,employment_type,pay_date,gross_wage,super_paid,expected_sg,payg_withheld,correct_payg
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-16,"$2,000.00",AUD 200.00,$240.00,400.0,400.0
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-30,"$2,000.00",AUD 200.00,$240.00,400.0,400.0
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-02-13,"$2,000.00",AUD 200.00,$240.00,400.0,400.0

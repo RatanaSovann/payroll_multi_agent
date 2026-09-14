@@ -1,4 +1,0 @@
-employee_id,name,state,department,employment_type,pay_date,gross_wage,super_paid,expected_sg,payg_withheld,correct_payg,cost_centre_code,union_membership_flag,locker_number
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-16,2000.0,240.0,240.0,400.0,400.0,CC-99,Y,100
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-30,2000.0,240.0,240.0,400.0,400.0,CC-99,Y,101
-EMP001,Employee EMP001,NSW,Operations,Full-time,2026-02-13,2000.0,240.0,240.0,400.0,400.0,CC-99,Y,102
