@@ -10,6 +10,11 @@ Pipeline:
 
 Usage:
   python orchestrator.py --file data/raw/payroll_data.csv
+  python orchestrator.py --file data/raw/payroll_data.csv --pin reports/audit_X.json
+
+--pin replays the LLM decisions recorded in an earlier run's audit file instead
+of making them again: the run becomes deterministic, and any correction a
+reviewer made to that file is carried into the new figures.
 """
 
 import os
@@ -64,7 +69,7 @@ def save_report(report: str, timestamp: str) -> str:
     return path
 
 
-def run_pipeline(csv_path: str) -> tuple[str, str]:
+def run_pipeline(csv_path: str, pin_source: str = None) -> tuple[str, str]:
 
     print_header()
     print(f"\n📂 Input: {csv_path}")
@@ -76,7 +81,9 @@ def run_pipeline(csv_path: str) -> tuple[str, str]:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     client    = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     reset_token_ledger()
-    AUDIT.start_run(csv_path, df)
+    AUDIT.start_run(csv_path, df, pin_source=pin_source)
+    if pin_source:
+        print(f"\U0001f4cc Replaying pinned decisions from {pin_source}\n")
 
     # ── Agent 1: Data Validator ────────────────────────────────────────────────
     print_step(1, 6, "Data Validator")
@@ -190,14 +197,25 @@ if __name__ == "__main__":
         default="data/raw/payroll_data.csv",
         help="Path to payroll CSV (default: data/raw/payroll_data.csv)"
     )
+    parser.add_argument(
+        "--pin",
+        default=None,
+        help="Replay the LLM decisions from an earlier run's audit JSON "
+             "instead of making them again (deterministic re-run; honours "
+             "reviewer corrections made to that file)"
+    )
     args = parser.parse_args()
+
+    if args.pin and not Path(args.pin).exists():
+        print(f"\n\u274c Pin file not found: {args.pin}")
+        sys.exit(1)
 
     if not Path(args.file).exists():
         print(f"\n❌ File not found: {args.file}")
         print("   Run 01_generate_data.ipynb first to create the dataset.")
         sys.exit(1)
 
-    report_path, dashboard_path = run_pipeline(args.file)
+    report_path, dashboard_path = run_pipeline(args.file, pin_source=args.pin)
 
     tokens = get_token_summary()
     print(f"\n{'═' * 62}")

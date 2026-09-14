@@ -37,9 +37,14 @@ Note: senior managers and executives are usually award-free (NMW code, but their
 salaries far exceed it — they will not be flagged). Professionals like software
 engineers fall under MA000065.
 
+For each title give a one-sentence "rationale": which award clause or duty
+makes this the right code and level. A reviewer checks that sentence against
+the award text, so cite the coverage reason — not your own certainty.
+
 Return ONLY valid JSON:
 {
-  "Job Title Here": {"award_code": "MA000065", "level": 2, "confidence": "HIGH"},
+  "Job Title Here": {"award_code": "MA000065", "level": 2, "confidence": "HIGH",
+                     "rationale": "why this award and level"},
   ...
 }
 """
@@ -58,6 +63,16 @@ class AwardClassifierAgent(BaseAgent):
     def run(self, df: pd.DataFrame) -> dict:
         title_col = "job_title" if "job_title" in df.columns else "department"
         unique_titles = sorted(df[title_col].dropna().astype(str).unique().tolist())
+
+        # A pinned classification replaces the model call entirely. Titles the
+        # pin doesn't cover fall through to unknown_coverage downstream, which
+        # is reported rather than guessed.
+        pinned = AUDIT.pinned_decision("award_classifier", "award_classification")
+        if pinned is not None:
+            self._log(f"      📌 Replaying pinned classification "
+                      f"({len(pinned)} title(s), no API call)")
+            self._log_award_summary(pinned)
+            return pinned
 
         self._log(f"      🏷️  Classifying {len(unique_titles)} unique job titles "
                   f"(from {len(df)} rows — {len(df) - len(unique_titles)} rows saved)")
@@ -94,13 +109,12 @@ class AwardClassifierAgent(BaseAgent):
             decision=classification,
         )
 
-        # Log summary
+        self._log_award_summary(classification)
+        return classification
+
+    def _log_award_summary(self, classification: dict):
         by_award = {}
         for t, c in classification.items():
-            code = c.get("award_code", "UNKNOWN")
-            by_award.setdefault(code, []).append(t)
+            by_award.setdefault(c.get("award_code", "UNKNOWN"), []).append(t)
         for code, titles in by_award.items():
-            name = SUPPORTED_AWARDS.get(code, code)
-            self._log(f"      → {name}: {len(titles)} title(s)")
-
-        return classification
+            self._log(f"      → {SUPPORTED_AWARDS.get(code, code)}: {len(titles)} title(s)")

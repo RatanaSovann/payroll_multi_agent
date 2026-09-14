@@ -181,11 +181,7 @@ def run_pipeline(df: pd.DataFrame, api_key: str, source_name: str) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
     reset_token_ledger()
 
-    # Audit needs a file path for hashing — write upload to temp
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
-        df.to_csv(f.name, index=False)
-        AUDIT.start_run(f.name, df)
-    AUDIT.metadata["input_file"] = source_name   # friendlier name than temp path
+    AUDIT.start_run(source_name, df)
 
     steps = st.session_state["steps"]
 
@@ -400,7 +396,7 @@ def main():
     with tab_audit:
         audit = r["audit"]
         st.markdown(f"**Run ID:** `{audit['metadata'].get('run_id')}` · "
-                    f"**Input SHA-256:** `{audit['metadata'].get('input_sha256','')[:16]}…` · "
+                    f"**{audit['metadata'].get('input_rows', 0):,} rows** · "
                     f"**{audit['total_events']} events**")
         st.caption("Every figure in the report traces back to a CALCULATION event below — "
                    "formula, inputs, regulatory basis, and row-level evidence. "

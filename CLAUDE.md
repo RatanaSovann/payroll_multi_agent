@@ -7,6 +7,7 @@ a findings report, an interactive dashboard, and a machine-readable audit trail 
 
 ```bash
 ./.venv/Scripts/python.exe orchestrator.py --file data/raw/payroll_data.csv   # headless CLI
+./.venv/Scripts/python.exe orchestrator.py --file x.csv --pin reports/audit_X.json  # replay
 ./.venv/Scripts/python.exe -m streamlit run streamlit_app.py                  # demo UI
 ```
 
@@ -44,7 +45,12 @@ Then `AUDIT.save()` → `reports/audit_<run_id>.json`.
    and orchestration are deterministic Python. Do not move arithmetic into a prompt.
 4. **"Unknown" is a valid answer.** Unmappable columns, unclassifiable titles and
    uncovered awards are reported as unknown, never guessed.
-5. **Everything material is audited.** `AUDIT` (module singleton in `src/audit.py`)
+5. **The two LLM decisions are pinnable.** Schema mapping and award classification
+   are the only non-deterministic steps feeding figures. `AUDIT.pinned_decision()`
+   replaces either with a prior run's recorded decision, so a reviewer's correction
+   survives a re-run. Any new decision that feeds a calculation should be pinnable
+   too, and replay must stay refused on a schema mismatch.
+6. **Everything material is audited.** `AUDIT` (module singleton in `src/audit.py`)
    is imported directly wherever it's needed — no parameter threading. Same pattern
    as `TOKEN_LEDGER` in `base_agent.py`. New calculations get a `log_calculation`
    with formula, inputs, result, regulatory basis and evidence rows.
@@ -77,7 +83,11 @@ src/agents/*.py            the six agents
 Branch `eval-harness-and-fixes`. In-flight, uncommitted: Langfuse tracing
 (`@observe` decorators on `BaseAgent.call` / `run_loop`).
 
-- `orchestrator.py` is **currently broken**: it imports
-  `from langfuse.anthropic import Anthropic` but still calls `anthropic.Anthropic(...)`.
-- `langfuse` is installed (4.15.2) but is not in `requirements.txt`.
+- `langfuse` 4.x has **no** `anthropic` drop-in wrapper (openai and langchain only);
+  tracing comes from `@observe` on `BaseAgent`, enriched with model/usage in `_track`.
+- Costs sent to Langfuse derive from the hardcoded `PRICING` table, which still
+  lists `claude-sonnet-4-6` — a placeholder, not a real model ID. Treat them as
+  estimates until that table is reconciled.
+- The input SHA-256 was removed: nothing read it and no input was retained to
+  check it against. Pinning replaced it as the reproducibility mechanism.
 - A golden-dataset eval harness was added in `5056757` and removed again in `571c793`.

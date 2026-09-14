@@ -69,6 +69,7 @@ Return format:
     "IncomingColName": "canonical_col_name"
   }},
   "merge_notes": "any notes about columns that need merging (optional)",
+  "rationale": "one or two sentences on any mapping a reviewer should check — unobvious matches, ambiguous names, anything you were unsure of",
   "confidence": "HIGH | MEDIUM | LOW"
 }}
 
@@ -106,21 +107,28 @@ class DataValidatorAgent(BaseAgent):
     def run(self, df: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
 
         # ── Step 1: Schema mapping ─────────────────────────────────────────────
-        self._log("      🗺️  Mapping schema to canonical columns...")
+        # A pinned mapping replaces the model call entirely, so a reviewer's
+        # correction to an earlier run survives into this one.
+        mapping_result = AUDIT.pinned_decision("data_validator", "schema_mapping")
 
-        mapping_result = self._map_schema(df)
+        if mapping_result is None:
+            self._log("      🗺️  Mapping schema to canonical columns...")
+            mapping_result = self._map_schema(df)
+            AUDIT.log_llm_decision(
+                agent="data_validator",
+                model=self.model,
+                decision_type="schema_mapping",
+                decision={
+                    "mapping":     mapping_result.get("mapping", {}),
+                    "confidence":  mapping_result.get("confidence"),
+                    "merge_notes": mapping_result.get("merge_notes", ""),
+                    "rationale":   mapping_result.get("rationale", ""),
+                },
+            )
+        else:
+            self._log("      📌 Replaying pinned schema mapping (no API call)")
+
         column_mapping = mapping_result.get("mapping", {})
-
-        AUDIT.log_llm_decision(
-            agent="data_validator",
-            model=self.model,
-            decision_type="schema_mapping",
-            decision={
-                "mapping": column_mapping,
-                "confidence": mapping_result.get("confidence"),
-                "merge_notes": mapping_result.get("merge_notes", ""),
-            },
-        )
         unmapped       = [k for k, v in column_mapping.items() if v == "UNMAPPED"]
         confidence     = mapping_result.get("confidence", "UNKNOWN")
 

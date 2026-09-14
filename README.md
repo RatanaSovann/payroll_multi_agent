@@ -63,9 +63,33 @@ findings.md      dashboard.html      + audit.json
 
 ### The audit trail (the differentiator)
 
-Every run emits `audit_<run>.json`: input file **SHA-256**, every **formula + inputs + result + regulatory basis (Act & section)**, row-level evidence, every threshold with its rationale, and every **LLM decision recorded verbatim** and flagged as the non-deterministic step.
+Every run emits `audit_<run>.json`: every **formula + inputs + result + regulatory basis (Act & section)**, row-level evidence, every threshold with its rationale, and every **LLM decision recorded verbatim** and flagged as the non-deterministic step.
 
-Chain of evidence: `report figure → CALCULATION event → formula → evidence rows → input hash`. "The AI said so" is not an answer the ATO accepts — this is the answer it does.
+Chain of evidence: `report figure → CALCULATION event → formula → inputs → evidence rows`. Every figure can be recomputed by hand from the record. "The AI said so" is not an answer the ATO accepts — this is the answer it does.
+
+The defensibility does not come from the model. It comes from the fact that the arithmetic is deterministic Python with a statutory citation attached, and from a qualified human who reviews and owns the result. The trail exists to make that review fast enough to be worth doing.
+
+### Pinned decisions — the audit file is also an input
+
+The pipeline has exactly **two** non-deterministic steps: the schema mapping (Agent 1) and the award classification (Agent 1.5). Everything downstream is deterministic. Pass an earlier run's audit file back in and those two decisions are replayed instead of re-made:
+
+```bash
+python orchestrator.py --file payroll.csv                            # fresh — the model decides
+python orchestrator.py --file payroll.csv --pin reports/audit_X.json # replay — the file decides
+```
+
+This is what makes expert review actionable. If Haiku classifies `Store Manager` as award-free when they are covered by General Retail, a reviewer edits that one entry in the audit JSON:
+
+```json
+"Store Manager": {"award_code": "MA000004", "level": 5, "confidence": "HIGH",
+                  "rationale": "reviewer override — General Retail covers store management"}
+```
+
+Re-run with `--pin` and every downstream figure — award underpayment, total exposure, risk rating, dashboard, report — recomputes from the corrected classification. The model is not consulted for that step, and the trail records the decision as replayed rather than freshly generated, so a later reader can always tell the two apart.
+
+Each classification also carries a **`rationale`**: the award clause or duty that justifies the code and level. It is review scaffolding, not evidence — its value is that a human can check it against the award text, not that the model produced it.
+
+Two honest limits: pinning fixes **figures**, not prose — the narrative and the final report are still generated fresh each run. And replay is refused outright if the pinned run's columns don't match the current input, because a mapping replayed onto a different schema produces figures that are silently wrong.
 
 ## Run locally
 
@@ -75,6 +99,7 @@ cd payroll-compliance-ai && pip install -r requirements.txt
 echo 'ANTHROPIC_API_KEY = "sk-ant-..."' > .streamlit/secrets.toml
 streamlit run streamlit_app.py            # web UI
 python orchestrator.py --file your.csv    # headless CLI
+python orchestrator.py --file your.csv --pin reports/audit_X.json   # deterministic re-run
 ```
 
 ## Current limitations (deliberate transparency)
@@ -96,7 +121,7 @@ The architecture is domain-portable: swap the tools and prompts and the same 6-a
 ```
 streamlit_app.py          # rate-limited public demo UI
 orchestrator.py           # CLI entry
-src/audit.py              # audit trail (zero tokens)
+src/audit.py              # audit trail + decision pinning (zero tokens)
 src/compliance.py         # SG / PAYG / casual checks (agent tools)
 src/award_engine.py       # FWC 2026 rates + underpayment math
 src/agents/               # the six agents + base loop / token ledger
