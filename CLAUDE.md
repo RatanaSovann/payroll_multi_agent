@@ -35,9 +35,13 @@ Then `AUDIT.save()` → `reports/audit_<run_id>.json`.
 ## Invariants — do not break these
 
 1. **Canonical schema is the contract.** `CANONICAL_SCHEMA` in
-   `src/agents/data_validator.py` (11 columns). Format chaos is quarantined in
+   `src/agents/data_validator.py` (12 columns; `job_title` is in `OPTIONAL_COLUMNS`
+   so it never trips the missing-required check). Format chaos is quarantined in
    Agent 1; everything downstream is written once against those names. Adding a
    column means updating that dict *and* the enrichment step that fills it.
+   A field that drives a check MUST be a mapping target — `job_title` was not,
+   so `Position`/`Role` columns went UNMAPPED and the award classifier silently
+   graded department names instead of job titles.
 2. **Capture at execution.** Tool results are seized in Python the moment the
    tool runs (`compliance_analyst.py`), never parsed back out of model prose. A
    number that reaches the report must have come from a Python return value.

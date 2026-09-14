@@ -146,13 +146,24 @@ def check_award_underpayment(
 
     title_col = "job_title" if "job_title" in work.columns else "department"
 
-    flagged, unknown_coverage = [], set()
+    # Uncovered titles are split by CAUSE: "the model returned UNKNOWN" and
+    # "this title never reached the classifier" are different failures and need
+    # different fixes, so lumping them together hides which one you have.
+    flagged           = []
+    unknown_coverage  = set()
+    unclassified      = set()   # title absent from the classification map
+    out_of_scope      = set()   # classified, but no rate table for that award
 
     for _, row in work.iterrows():
         title = str(row.get(title_col, "Unknown"))
         cls   = classification_map.get(title)
 
-        if not cls or cls.get("award_code") not in AWARD_RATES:
+        if not cls:
+            unclassified.add(title)
+            unknown_coverage.add(title)
+            continue
+        if cls.get("award_code") not in AWARD_RATES:
+            out_of_scope.add(title)
             unknown_coverage.add(title)
             continue
 
@@ -208,6 +219,9 @@ def check_award_underpayment(
             "rows_flagged": int(len(flagged_df)),
             "titles_covered": int(covered_titles),
             "titles_unknown": sorted(unknown_coverage),
+            "titles_unclassified": sorted(unclassified),
+            "titles_out_of_scope": sorted(out_of_scope),
+            "title_column_used": title_col,
             "rates_effective": "1 July 2026 (FWC 2026 AWR, +4.75%; NMW $26.44/hr; casual loading 25%)",
         },
         result=round(float(flagged_df["underpayment"].sum()), 2) if len(flagged_df) else 0.0,

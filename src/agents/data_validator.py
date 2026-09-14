@@ -33,9 +33,15 @@ CANONICAL_SCHEMA = {
     "expected_sg":     "Expected super guarantee amount (typically 12% of gross OTE)",
     "payg_withheld":   "PAYG income tax withheld from the employee this period",
     "correct_payg":    "Correct PAYG withholding amount based on ATO tax bracket rates",
+    "job_title":       "Employee's job title / position / role (e.g. Payroll Officer, Chef, Store Manager)",
 }
 
-REQUIRED_COLUMNS = list(CANONICAL_SCHEMA.keys())
+# job_title drives the entire Modern Award check, so it has to be a mapping
+# target: without one, a "Position" or "Role" column goes UNMAPPED and both the
+# classifier and award_engine silently fall back to department names, which do
+# not classify into awards. It stays OPTIONAL — many payroll exports lack it.
+OPTIONAL_COLUMNS = {"job_title"}
+REQUIRED_COLUMNS = [c for c in CANONICAL_SCHEMA if c not in OPTIONAL_COLUMNS]
 
 # ── System prompts ─────────────────────────────────────────────────────────────
 
@@ -55,6 +61,10 @@ Rules:
 - Use "UNMAPPED" if a column has no clear canonical equivalent
 - Every incoming column must appear as a key in your response
 - Be liberal with matching — "GrossEarnings", "gross_pay", "TotalPay" all map to "gross_wage"
+- "Position", "Role", "Job Title", "Occupation", "Designation" all map to "job_title".
+  job_title and department are DIFFERENT things: "Payroll Officer" is a job_title,
+  "Finance" is a department. If the file has only one of them, map it to whichever
+  it actually is — never map a department to job_title to fill the gap.
 - Common payroll system patterns to recognise:
     Xero:    EmployeeID, FirstName+LastName, GrossEarnings, SuperannuationExpense
     MYOB:    Card ID, Gross Wages, Super Expense

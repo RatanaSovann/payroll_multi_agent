@@ -22,20 +22,45 @@ SYSTEM_PROMPT = """
 You classify Australian job titles into Modern Awards and classification levels.
 
 SUPPORTED AWARDS (only use these codes):
-- MA000002: Clerks — Private Sector Award (admin, office, reception, bookkeeping, data entry)
-- MA000004: General Retail Industry Award (retail sales, shop assistants, store managers)
-- MA000009: Hospitality Industry (General) Award (chefs, waiters, bar, hotel staff)
-- MA000010: Manufacturing and Associated Industries Award (production, trades, machine operators, warehouse)
-- MA000065: Professional Employees Award (engineers, IT professionals, scientists, data analysts)
-- NMW: National Minimum Wage (use if genuinely award-free, e.g. most managers above award coverage)
-- UNKNOWN: Use if the title doesn't clearly fit any of the above
+- MA000002: Clerks — Private Sector Award. Levels 1-5.
+    Admin assistant, receptionist, data entry, bookkeeper, payroll officer,
+    accounts payable/receivable, office manager, executive assistant, clerk.
+- MA000004: General Retail Industry Award. Levels 1-8.
+    Retail assistant, sales assistant, shop assistant, checkout operator,
+    visual merchandiser, department manager, store manager, assistant manager.
+- MA000009: Hospitality Industry (General) Award. Levels 1-6.
+    Chef, cook, kitchen hand, waiter, food & beverage attendant, bartender,
+    barista, housekeeper, porter, front office, duty manager, venue manager.
+- MA000010: Manufacturing and Associated Industries Award. Levels 1-8.
+    Production worker, machine operator, process worker, assembler, fitter,
+    welder, boilermaker, storeperson, warehouse/forklift operator, dispatch.
+- MA000065: Professional Employees Award. Levels 1-4.
+    Engineer, software developer, programmer, IT/systems analyst, scientist,
+    data analyst, data scientist, architect, surveyor, quantity surveyor.
+- NMW: National Minimum Wage. Genuinely award-free roles — senior executives
+    (CEO, CFO, GM, director) and salaried roles above award coverage.
+- UNKNOWN: the honest answer when the role sits outside all five awards above.
+    Common cases: nurses, aged care, teachers, childcare, construction and
+    electrical trades, drivers/transport, security, cleaning, real estate,
+    banking/finance specialists, legal, government. These have their own
+    awards, for which this tool does not yet hold rate tables.
 
-Classification levels: 1 = entry level, higher = more senior/qualified.
-Most awards have 4-8 levels. When unsure, use a middle level and mark confidence LOW.
+Match on the WORK PERFORMED, not the seniority word. "Warehouse Manager" is
+storage/manufacturing (MA000010); "Payroll Manager" is clerical (MA000002).
+A seniority word raises the LEVEL; it rarely changes the award.
 
-Note: senior managers and executives are usually award-free (NMW code, but their
-salaries far exceed it — they will not be flagged). Professionals like software
-engineers fall under MA000065.
+Return UNKNOWN only when the role genuinely falls outside all five awards —
+never merely because you are unsure of the level. Pick the level and mark
+confidence LOW instead.
+
+If a value is a DEPARTMENT rather than a job title ("Finance", "Operations",
+"Head Office"), you cannot classify it: an award attaches to a person's duties,
+not to a business unit. Return UNKNOWN, confidence LOW, and say so in the
+rationale.
+
+Classification levels: 1 = entry level, higher = more senior/qualified. Use the
+median wage supplied with each title to place the level — a title paid well
+above the award floor is usually mid-to-senior.
 
 For each title give a one-sentence "rationale": which award clause or duty
 makes this the right code and level. A reviewer checks that sentence against
@@ -77,20 +102,34 @@ class AwardClassifierAgent(BaseAgent):
         self._log(f"      🏷️  Classifying {len(unique_titles)} unique job titles "
                   f"(from {len(df)} rows — {len(df) - len(unique_titles)} rows saved)")
 
-        # Include median wage per title — helps Haiku pick sensible levels
+        # Median wage places the level; department disambiguates titles that
+        # span awards (a "Manager" in Retail vs one in Warehouse).
         wage_context = {}
         if "gross_wage" in df.columns:
             med = df.groupby(title_col)["gross_wage"].median().round(0)
             wage_context = {t: f"median fortnightly gross ${med.get(t, 0):,.0f}"
                             for t in unique_titles}
 
-        user_msg = (
-            "Classify these job titles:\n"
-            + json.dumps(
-                [{"title": t, "context": wage_context.get(t, "")} for t in unique_titles],
-                indent=1,
-            )
-        )
+        dept_context = {}
+        if "department" in df.columns and title_col != "department":
+            modes = df.groupby(title_col)["department"].agg(
+                lambda x: x.mode().iat[0] if len(x.mode()) else "")
+            dept_context = {t: str(modes.get(t, "")) for t in unique_titles}
+
+        payload = [{
+            "title":      t,
+            "department": dept_context.get(t, ""),
+            "context":    wage_context.get(t, ""),
+        } for t in unique_titles]
+
+        # Be explicit when there is no job_title column: the model is being shown
+        # department names, and should say so rather than force a match.
+        if title_col != "job_title":
+            payload.insert(0, {"WARNING": f"This dataset has no job_title column. The "
+                                          f"values below come from '{title_col}' and may "
+                                          f"be departments rather than job titles."})
+
+        user_msg = "Classify these job titles:\n" + json.dumps(payload, indent=1)
 
         raw = self.call(system=SYSTEM_PROMPT, user_message=user_msg, max_tokens=1024)
 
