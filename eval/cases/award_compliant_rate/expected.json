@@ -1,0 +1,15 @@
+{
+  "id": "award_compliant_rate",
+  "description": "Paid well above every award minimum \u2014 award check must report zero underpayment.",
+  "tags": [
+    "award",
+    "llm_dependent"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "award_total": 0.0,
+      "award_employees": 0
+    }
+  }
+}

@@ -1,0 +1,4 @@
+EmployeeID,EmployeeName,State,Department,EmploymentBasis,PaymentDate,GrossEarnings,SuperannuationExpense,ExpectedSuper,PAYGWithheld,CorrectPAYG
+EMP001,Alice Smith,NSW,Finance,Full-time,2026-01-16,2000.0,200.0,240.0,400.0,400.0
+EMP001,Alice Smith,NSW,Finance,Full-time,2026-01-30,2000.0,200.0,240.0,400.0,400.0
+EMP001,Alice Smith,NSW,Finance,Full-time,2026-02-13,2000.0,200.0,240.0,400.0,400.0

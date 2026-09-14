@@ -1,0 +1,18 @@
+{
+  "id": "payg_deviation_only",
+  "description": "PAYG deviation beyond the 15% threshold; SG stays compliant.",
+  "tags": [
+    "deterministic"
+  ],
+  "row_count": 9,
+  "expected": {
+    "exact": {
+      "payg_total": 600.0,
+      "payg_employees": 2,
+      "payg_runs": 6,
+      "sg_total": 0.0,
+      "casual_total": 0.0,
+      "total_exposure": 600.0
+    }
+  }
+}

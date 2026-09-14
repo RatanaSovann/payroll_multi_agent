@@ -1,0 +1,15 @@
+{
+  "id": "messy_null_tokens",
+  "description": "Null tokens (N/A, TBC, --) must become NaN and quarantine the row, not be read as 0.",
+  "tags": [
+    "cleaning",
+    "deterministic"
+  ],
+  "row_count": 4,
+  "expected": {
+    "exact": {
+      "quarantined": 3,
+      "rows_analysable": 1
+    }
+  }
+}

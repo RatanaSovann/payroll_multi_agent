@@ -1,0 +1,26 @@
+{
+  "id": "award_casual_loading",
+  "description": "Casual retail worker at $20/hr \u2014 the 25% casual loading must be applied to the minimum before comparison.",
+  "tags": [
+    "award",
+    "llm_dependent"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "award_employees": 1,
+      "award_runs": 3
+    },
+    "bounded": {
+      "award_total": [
+        3002.52,
+        4683.12
+      ]
+    },
+    "labelled": {
+      "classification": {
+        "Retail Assistant": "MA000004"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "messy_european_decimals",
+  "description": "European decimal format (1.234,56) must parse as 1234.56.",
+  "tags": [
+    "cleaning",
+    "deterministic"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "sg_total": 120.0,
+      "quarantined": 0
+    }
+  }
+}

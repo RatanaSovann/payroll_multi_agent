@@ -1,0 +1,19 @@
+{
+  "id": "logical_duplicate_rows",
+  "description": "Same employee_id + pay_date twice must be FLAGGED but not silently dropped (could be a legitimate multi-line pay).",
+  "tags": [
+    "cleaning",
+    "deterministic"
+  ],
+  "row_count": 2,
+  "expected": {
+    "exact": {
+      "sg_total": 60.0,
+      "sg_runs": 2,
+      "quarantined": 0
+    },
+    "labelled": {
+      "logical_duplicates_flagged": true
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "casual_super_missing",
+  "description": "Casuals paid zero super. These dollars appear in BOTH the SG and casual checks \u2014 the roll-up must count them ONCE.",
+  "tags": [
+    "deterministic",
+    "double_count"
+  ],
+  "row_count": 6,
+  "expected": {
+    "exact": {
+      "casual_total": 540.0,
+      "casual_employees": 1,
+      "sg_total": 540.0,
+      "sg_employees": 1,
+      "payg_total": 0.0,
+      "total_exposure": 540.0
+    }
+  }
+}

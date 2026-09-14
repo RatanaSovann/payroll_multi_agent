@@ -1,0 +1,763 @@
+{
+  "stage": "deterministic",
+  "totals": {
+    "PASS": 61,
+    "FAIL": 9,
+    "SKIP": 23,
+    "ERROR": 0
+  },
+  "cases": [
+    {
+      "id": "all_rows_quarantined",
+      "tags": [
+        "deterministic",
+        "boundary"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        },
+        {
+          "name": "rows_analysable",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "quality_score",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "ambiguous_job_titles",
+      "tags": [
+        "award",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "expect_unknown_or_low_confidence",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "award_casual_loading",
+      "tags": [
+        "award",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "award_employees",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_runs",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_total",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "classification",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "award_compliant_rate",
+      "tags": [
+        "award",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "award_total",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_employees",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "award_no_rate_columns",
+      "tags": [
+        "award",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "award_employees",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_total",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "award_underpayment_severe",
+      "tags": [
+        "award",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "award_employees",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_runs",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "award_total",
+          "status": "SKIP",
+          "detail": "award check needs the classifier (--stage full)"
+        },
+        {
+          "name": "classification",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "casual_super_missing",
+      "tags": [
+        "deterministic",
+        "double_count"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $540.00, got $540.00"
+        },
+        {
+          "name": "casual_employees",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $540.00, got $540.00"
+        },
+        {
+          "name": "sg_employees",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "FAIL",
+          "detail": "expected $540.00, got $1,080.00"
+        }
+      ]
+    },
+    {
+      "id": "clean_baseline",
+      "tags": [
+        "deterministic",
+        "baseline"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "sg_employees",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "payg_employees",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "casual_employees",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        }
+      ]
+    },
+    {
+      "id": "combined_all_issues",
+      "tags": [
+        "deterministic",
+        "double_count"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $660.00, got $660.00"
+        },
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $300.00, got $300.00"
+        },
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $540.00, got $540.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "FAIL",
+          "detail": "expected $960.00, got $1,500.00"
+        }
+      ]
+    },
+    {
+      "id": "employment_type_variants",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "casual_employees",
+          "status": "PASS",
+          "detail": "expected 3, got 3"
+        },
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $540.00, got $540.00"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $540.00, got $540.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "FAIL",
+          "detail": "expected $540.00, got $1,080.00"
+        }
+      ]
+    },
+    {
+      "id": "exact_duplicate_rows",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $40.00, got $40.00"
+        },
+        {
+          "name": "sg_runs",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "duplicates_removed",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        }
+      ]
+    },
+    {
+      "id": "excel_serial_dates",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $80.00, got $80.00"
+        },
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "dates_recovered",
+          "status": "FAIL",
+          "detail": "expected 2, got 0"
+        }
+      ]
+    },
+    {
+      "id": "logical_duplicate_rows",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $60.00, got $60.00"
+        },
+        {
+          "name": "sg_runs",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        },
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "logical_duplicates_flagged",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "messy_accounting_negatives",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        },
+        {
+          "name": "rows_analysable",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        }
+      ]
+    },
+    {
+      "id": "messy_currency_formats",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "FAIL",
+          "detail": "expected $120.00, got $0.00"
+        },
+        {
+          "name": "sg_employees",
+          "status": "FAIL",
+          "detail": "expected 1, got 0"
+        },
+        {
+          "name": "quarantined",
+          "status": "FAIL",
+          "detail": "expected 0, got 3"
+        }
+      ]
+    },
+    {
+      "id": "messy_european_decimals",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "FAIL",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "FAIL",
+          "detail": "expected $120.00, got $0.00"
+        },
+        {
+          "name": "quarantined",
+          "status": "FAIL",
+          "detail": "expected 0, got 3"
+        }
+      ]
+    },
+    {
+      "id": "messy_null_tokens",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 3, got 3"
+        },
+        {
+          "name": "rows_analysable",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        }
+      ]
+    },
+    {
+      "id": "payg_deviation_only",
+      "tags": [
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $600.00, got $600.00"
+        },
+        {
+          "name": "payg_employees",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        },
+        {
+          "name": "payg_runs",
+          "status": "PASS",
+          "detail": "expected 6, got 6"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $600.00, got $600.00"
+        }
+      ]
+    },
+    {
+      "id": "payg_just_under_threshold",
+      "tags": [
+        "deterministic",
+        "boundary"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "payg_employees",
+          "status": "PASS",
+          "detail": "expected 0, got 0"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        }
+      ]
+    },
+    {
+      "id": "period_outside_hardcoded_range",
+      "tags": [
+        "reporting",
+        "llm_dependent"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $120.00, got $120.00"
+        },
+        {
+          "name": "report_period_must_mention",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        },
+        {
+          "name": "report_period_must_not_mention",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "quarantine_invalid_rows",
+      "tags": [
+        "cleaning",
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "quarantined",
+          "status": "PASS",
+          "detail": "expected 3, got 3"
+        },
+        {
+          "name": "rows_analysable",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $40.00, got $40.00"
+        }
+      ]
+    },
+    {
+      "id": "schema_myob",
+      "tags": [
+        "schema",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "<run>",
+          "status": "SKIP",
+          "detail": "non-canonical schema needs the mapper (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "schema_pascal_case",
+      "tags": [
+        "schema",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "<run>",
+          "status": "SKIP",
+          "detail": "non-canonical schema needs the mapper (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "schema_split_name",
+      "tags": [
+        "schema",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "<run>",
+          "status": "SKIP",
+          "detail": "non-canonical schema needs the mapper (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "schema_unmappable_extras",
+      "tags": [
+        "schema",
+        "llm_dependent"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "expect_unmapped",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    },
+    {
+      "id": "schema_xero",
+      "tags": [
+        "schema",
+        "llm_dependent"
+      ],
+      "verdict": "SKIP",
+      "checks": [
+        {
+          "name": "<run>",
+          "status": "SKIP",
+          "detail": "non-canonical schema needs the mapper (--stage full)"
+        }
+      ]
+    },
+    {
+      "id": "sg_underpayment_only",
+      "tags": [
+        "deterministic"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $300.00, got $300.00"
+        },
+        {
+          "name": "sg_employees",
+          "status": "PASS",
+          "detail": "expected 2, got 2"
+        },
+        {
+          "name": "sg_runs",
+          "status": "PASS",
+          "detail": "expected 6, got 6"
+        },
+        {
+          "name": "payg_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "casual_total",
+          "status": "PASS",
+          "detail": "expected $0.00, got $0.00"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $300.00, got $300.00"
+        }
+      ]
+    },
+    {
+      "id": "single_employee_single_period",
+      "tags": [
+        "deterministic",
+        "boundary"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $40.00, got $40.00"
+        },
+        {
+          "name": "sg_employees",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "sg_runs",
+          "status": "PASS",
+          "detail": "expected 1, got 1"
+        },
+        {
+          "name": "total_exposure",
+          "status": "PASS",
+          "detail": "expected $40.00, got $40.00"
+        }
+      ]
+    },
+    {
+      "id": "xss_in_text_fields",
+      "tags": [
+        "security"
+      ],
+      "verdict": "PASS",
+      "checks": [
+        {
+          "name": "sg_total",
+          "status": "PASS",
+          "detail": "expected $120.00, got $120.00"
+        },
+        {
+          "name": "dashboard_must_escape",
+          "status": "SKIP",
+          "detail": "needs --stage full"
+        }
+      ]
+    }
+  ]
+}

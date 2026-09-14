@@ -1,0 +1,23 @@
+{
+  "id": "schema_xero",
+  "description": "Xero-style column names must map to the canonical schema.",
+  "tags": [
+    "schema",
+    "llm_dependent"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "sg_total": 120.0,
+      "sg_employees": 1
+    },
+    "labelled": {
+      "mapping_required": {
+        "EmployeeID": "employee_id",
+        "GrossEarnings": "gross_wage",
+        "SuperannuationExpense": "super_paid",
+        "EmploymentBasis": "employment_type"
+      }
+    }
+  }
+}

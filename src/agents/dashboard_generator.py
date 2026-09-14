@@ -383,7 +383,11 @@ class DashboardGeneratorAgent:
         findings = summary.get("findings", [])
         if not findings:
             return "<p>No data</p>"
-        labels  = [f["issue_type"] for f in findings]
+        # A finding flagged counted_in_total=False is a slice of another finding,
+        # not extra liability — say so on the bar so the chart never reads as a sum.
+        labels  = [f["issue_type"] + ("" if f.get("counted_in_total", True)
+                                      else f" (within {f.get('subset_of', 'above')})")
+                   for f in findings]
         values  = [float(f["total_exposure_aud"]) for f in findings]
         colours = [COLOURS["high"], COLOURS["medium"], COLOURS["medium"]]
 
@@ -566,12 +570,15 @@ class DashboardGeneratorAgent:
         rows = ""
         for f in findings:
             score  = score_map.get(f["issue_type"], "N/A")
+            subset = ("" if f.get("counted_in_total", True) else
+                      f'<br><span style="font-size:0.8em;color:#777">already counted '
+                      f'within {f.get("subset_of", "another finding")}</span>')
             colour = RISK_COLOURS.get(score, "#999")
             badge  = (f'<span style="background:{colour};color:white;padding:2px 8px;'
                       f'border-radius:4px;font-size:0.82em;font-weight:bold">{score}</span>')
             rows += f"""
         <tr>
-          <td><strong>{f['issue_type']}</strong></td>
+          <td><strong>{f['issue_type']}</strong>{subset}</td>
           <td>{f['employees_affected']}</td>
           <td>{f['pay_runs_affected']}</td>
           <td><strong>${float(f['total_exposure_aud']):,.2f}</strong></td>

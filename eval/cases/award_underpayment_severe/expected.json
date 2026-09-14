@@ -1,0 +1,26 @@
+{
+  "id": "award_underpayment_severe",
+  "description": "Professional-award title paid $15/hr \u2014 below EVERY level of MA000065, so it must flag regardless of which level the classifier picks.",
+  "tags": [
+    "award",
+    "llm_dependent"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "award_employees": 1,
+      "award_runs": 3
+    },
+    "bounded": {
+      "award_total": [
+        3773.4,
+        6272.28
+      ]
+    },
+    "labelled": {
+      "classification": {
+        "Software Engineer": "MA000065"
+      }
+    }
+  }
+}

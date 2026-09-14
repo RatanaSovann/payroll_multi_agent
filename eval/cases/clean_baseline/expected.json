@@ -1,0 +1,20 @@
+{
+  "id": "clean_baseline",
+  "description": "Fully compliant canonical data \u2014 every check must report zero.",
+  "tags": [
+    "deterministic",
+    "baseline"
+  ],
+  "row_count": 9,
+  "expected": {
+    "exact": {
+      "sg_total": 0.0,
+      "payg_total": 0.0,
+      "casual_total": 0.0,
+      "sg_employees": 0,
+      "payg_employees": 0,
+      "casual_employees": 0,
+      "total_exposure": 0.0
+    }
+  }
+}

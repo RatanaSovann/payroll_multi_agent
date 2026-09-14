@@ -1,0 +1,16 @@
+{
+  "id": "messy_accounting_negatives",
+  "description": "Accounting negatives (123.45) and trailing-minus must parse as negative, and negative gross must be quarantined rather than analysed.",
+  "tags": [
+    "cleaning",
+    "deterministic"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "quarantined": 2,
+      "rows_analysable": 1,
+      "sg_total": 0.0
+    }
+  }
+}

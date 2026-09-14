@@ -1,0 +1,19 @@
+{
+  "id": "xss_in_text_fields",
+  "description": "Markup in CSV text fields must be escaped in the generated dashboard HTML, not rendered as live markup.",
+  "tags": [
+    "security"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "sg_total": 120.0
+    },
+    "labelled": {
+      "dashboard_must_escape": [
+        "<script>alert('xss')</script>",
+        "<img src=x onerror=alert(1)>"
+      ]
+    }
+  }
+}

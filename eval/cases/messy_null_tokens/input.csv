@@ -1,0 +1,5 @@
+employee_id,name,state,department,employment_type,pay_date,gross_wage,super_paid,expected_sg,payg_withheld,correct_payg
+EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-16,N/A,240.0,240.0,400.0,400.0
+EMP002,Employee EMP002,NSW,Operations,Full-time,2026-01-16,TBC,240.0,240.0,400.0,400.0
+EMP003,Employee EMP003,NSW,Operations,Full-time,2026-01-16,--,240.0,240.0,400.0,400.0
+EMP004,Employee EMP004,NSW,Operations,Full-time,2026-01-16,2000.0,240.0,240.0,400.0,400.0

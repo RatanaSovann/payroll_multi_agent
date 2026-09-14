@@ -1,0 +1,17 @@
+{
+  "id": "payg_just_under_threshold",
+  "description": "PAYG deviation of exactly 15% must NOT flag (threshold is strictly greater-than).",
+  "tags": [
+    "deterministic",
+    "boundary"
+  ],
+  "row_count": 3,
+  "expected": {
+    "exact": {
+      "payg_total": 0.0,
+      "payg_employees": 0,
+      "sg_total": 0.0,
+      "total_exposure": 0.0
+    }
+  }
+}

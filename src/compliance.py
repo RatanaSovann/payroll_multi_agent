@@ -261,12 +261,37 @@ def generate_executive_summary(sg: dict, payg: dict, casuals: dict) -> dict:
     """
     Rolls up all three compliance checks into a single findings summary.
     This is what gets presented to the client first.
+
+    De-duplication: the casual figure is a SUBSET of the SG figure, not an
+    additional liability. A casual paid zero super has super_paid < expected_sg,
+    so every dollar the casual check reports is already counted by the SG check.
+    Adding the two would overstate exposure — the client's headline number would
+    be wrong, and in the direction that invents a liability. The casual finding
+    stays in `findings` as a breakdown of WHERE the SG exposure sits, flagged
+    with `counted_in_total: False`.
     """
     total_exposure = round(
         sg["total_shortfall_aud"] +
-        payg["total_exposure_aud"] +
-        casuals["total_shortfall_aud"],
+        payg["total_exposure_aud"],
         2
+    )
+
+    AUDIT.log_calculation(
+        agent="compliance_analyst",
+        name="total_exposure_rollup",
+        formula="sg_shortfall + payg_exposure  (casual shortfall EXCLUDED: subset of SG)",
+        inputs={
+            "sg_shortfall_aud": sg["total_shortfall_aud"],
+            "payg_exposure_aud": payg["total_exposure_aud"],
+            "casual_shortfall_aud": casuals["total_shortfall_aud"],
+        },
+        result=total_exposure,
+        regulatory_basis="Exposure is a sum of distinct underpaid dollars; a casual "
+                         "paid $0 super is flagged by both checks but owed once",
+        evidence=[{
+            "note": "Casual shortfall is reported separately for remediation "
+                    "targeting, not added to the total.",
+        }],
     )
 
     return {
@@ -277,18 +302,22 @@ def generate_executive_summary(sg: dict, payg: dict, casuals: dict) -> dict:
                 "employees_affected":  sg["employees_affected"],
                 "pay_runs_affected":   sg["pay_runs_affected"],
                 "total_exposure_aud":  sg["total_shortfall_aud"],
+                "counted_in_total":    True,
             },
             {
                 "issue_type":          payg["issue_type"],
                 "employees_affected":  payg["employees_affected"],
                 "pay_runs_affected":   payg["pay_runs_affected"],
                 "total_exposure_aud":  payg["total_exposure_aud"],
+                "counted_in_total":    True,
             },
             {
                 "issue_type":          casuals["issue_type"],
                 "employees_affected":  casuals["employees_affected"],
                 "pay_runs_affected":   casuals["pay_runs_affected"],
                 "total_exposure_aud":  casuals["total_shortfall_aud"],
+                "counted_in_total":    False,
+                "subset_of":           sg["issue_type"],
             },
         ],
     }

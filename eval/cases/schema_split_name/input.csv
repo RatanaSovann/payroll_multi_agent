@@ -1,0 +1,4 @@
+Employee_ID,First_Name,Last_Name,State,Department,Employment_Type,Pay_Date,Gross_Wage,Super_Paid,Expected_SG,PAYG_Withheld,Correct_PAYG
+EMP001,Carol,White,QLD,IT,Full-time,2026-01-16,2000.0,200.0,240.0,400.0,400.0
+EMP001,Carol,White,QLD,IT,Full-time,2026-01-30,2000.0,200.0,240.0,400.0,400.0
+EMP001,Carol,White,QLD,IT,Full-time,2026-02-13,2000.0,200.0,240.0,400.0,400.0

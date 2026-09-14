@@ -1,0 +1,16 @@
+{
+  "id": "excel_serial_dates",
+  "description": "5-digit Excel serial dates must be recovered as real dates.",
+  "tags": [
+    "cleaning",
+    "deterministic"
+  ],
+  "row_count": 2,
+  "expected": {
+    "exact": {
+      "sg_total": 80.0,
+      "quarantined": 0,
+      "dates_recovered": 2
+    }
+  }
+}

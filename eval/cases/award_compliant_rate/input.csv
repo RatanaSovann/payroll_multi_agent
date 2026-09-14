@@ -1,0 +1,4 @@
+employee_id,name,state,department,employment_type,pay_date,gross_wage,super_paid,expected_sg,payg_withheld,correct_payg,job_title,hourly_rate,hours_worked
+EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-16,4560.0,547.2,547.2,0.0,0.0,Software Engineer,60.0,76.0
+EMP001,Employee EMP001,NSW,Operations,Full-time,2026-01-30,4560.0,547.2,547.2,0.0,0.0,Software Engineer,60.0,76.0
+EMP001,Employee EMP001,NSW,Operations,Full-time,2026-02-13,4560.0,547.2,547.2,0.0,0.0,Software Engineer,60.0,76.0

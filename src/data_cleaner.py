@@ -53,6 +53,15 @@ NULL_TOKENS = {"", "n/a", "na", "null", "none", "-", "--", "---", "tbc", "tbd",
 
 # ── Numeric coercion ──────────────────────────────────────────────────────────
 
+def _as_text(val):
+    """Render a raw cell as the text a human would have typed."""
+    if pd.isna(val):
+        return val
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    return str(val).strip()
+
+
 def _parse_number(val):
     """Parse one messy numeric cell. Returns (value_or_nan, status)."""
     if pd.isna(val):
@@ -73,15 +82,29 @@ def _parse_number(val):
     is_pct = text.endswith("%")
     text = text.rstrip("%").strip()
 
-    # Strip currency symbols / codes / whitespace / thousands separators
-    text = re.sub(r"[$£€¥\s]", "", text)
-    text = re.sub(r"(?i)\b(aud|usd|nzd)\b", "", text)
+    # Currency codes first, anchored to either end - "AUD 200.00", "200.00 AUD"
+    # and "AUD200.00" all occur. Anchoring keeps this conservative: a code buried
+    # mid-string ("200 AUD approx") stays unparseable rather than being guessed.
+    text = re.sub(r"(?i)^(aud|usd|nzd)\s*|\s*(aud|usd|nzd)$", "", text.strip())
 
-    # European decimal: 1.234,56 → 1234.56  (comma decimal, dot thousands)
-    if "," in text and "." in text and text.rfind(",") > text.rfind("."):
-        text = text.replace(".", "").replace(",", ".")
-    else:
-        text = text.replace(",", "")  # commas are thousands separators
+    # Strip currency symbols / whitespace
+    text = re.sub(r"[$£€¥\s]", "", text)
+
+    if "," in text and "." in text:
+        if text.rfind(",") > text.rfind("."):
+            text = text.replace(".", "").replace(",", ".")  # 1.234,56 -> 1234.56
+        else:
+            text = text.replace(",", "")                    # 1,234.56 -> 1234.56
+    elif "," in text:
+        # A lone comma is ambiguous. Thousands groups are always exactly three
+        # digits, so "1,234" is 1234 but "200,00" is a European decimal - reading
+        # it as 20000 inflates a wage a hundredfold and silently flips the
+        # super-exceeds-gross quarantine rule.
+        head, _, tail = text.rpartition(",")
+        if "," in head or re.fullmatch(r"\d{3}", tail):
+            text = text.replace(",", "")                    # thousands separator
+        else:
+            text = text.replace(",", ".")                   # decimal comma
 
     try:
         num = float(text)
@@ -124,14 +147,18 @@ def clean_dataframe(df: pd.DataFrame):
     for col in NUMERIC_COLS:
         if col not in work.columns:
             continue
-        if work[col].dtype == object:
+        # Gate on "already numeric", not "dtype is object": pandas 3 infers text
+        # columns as StringDtype, so an `== object` test sends every messy cell
+        # straight to to_numeric() and quietly nulls it — the cleaner below would
+        # never run at all.
+        if pd.api.types.is_numeric_dtype(work[col]):
+            work[col] = pd.to_numeric(work[col], errors="coerce")
+        else:
             values, counts = _clean_numeric_column(work[col])
             work[col] = values
             interesting = {k: v for k, v in counts.items() if k not in ("ok", "already_null")}
             if interesting:
                 numeric_summary[col] = interesting
-        else:
-            work[col] = pd.to_numeric(work[col], errors="coerce")
 
     if numeric_summary:
         AUDIT.log_transform("data_cleaner", "numeric_coercion", {
@@ -177,14 +204,27 @@ def clean_dataframe(df: pd.DataFrame):
     for col in DATE_COLS:
         if col not in work.columns:
             continue
-        original_null = work[col].isna().sum()
-        parsed = pd.to_datetime(work[col], errors="coerce", dayfirst=True)
+        original_null = int(work[col].isna().sum())
 
-        # Excel serial dates (numbers like 46037) survive as NaT — recover them
-        serial_mask = parsed.isna() & work[col].apply(
-            lambda x: bool(re.fullmatch(r"\d{5}", str(x).strip())) if pd.notna(x) else False)
+        # Parse from TEXT, never from raw numerics. pandas reads an integer
+        # column as epoch nanoseconds, so a CSV whose Excel serials arrived as
+        # ints (46038) silently yields 1970-01-01 instead of NaT — which the
+        # old "recover whatever failed to parse" guard could never see.
+        if pd.api.types.is_datetime64_any_dtype(work[col]):
+            as_text = work[col]
+        else:
+            as_text = work[col].apply(_as_text)
+
+        # Excel serial dates (numbers like 46037) are not dates in any format —
+        # identify them from the source value, not from a parse failure.
+        serial_mask = as_text.apply(
+            lambda x: bool(re.fullmatch(r"\d{5}", x)) if isinstance(x, str) else False)
+
+        parsed = pd.to_datetime(as_text.where(~serial_mask), errors="coerce",
+                                dayfirst=True)
+
         if serial_mask.any():
-            serials = pd.to_numeric(work.loc[serial_mask, col], errors="coerce")
+            serials = pd.to_numeric(as_text[serial_mask], errors="coerce")
             parsed.loc[serial_mask] = pd.to_datetime(serials, unit="D", origin="1899-12-30")
             AUDIT.log_transform("data_cleaner", "excel_serial_dates", {
                 "column": col, "rows_recovered": int(serial_mask.sum()),

@@ -33,6 +33,14 @@ from src.agents import (
 from src.agents.base_agent import reset_token_ledger, get_token_summary
 from src.audit import AUDIT
 
+# Windows consoles default to cp1252, which cannot encode the box-drawing and
+# emoji characters this CLI prints — the run died on its own banner before doing
+# any work. Force UTF-8 on the streams we own rather than making every caller
+# remember PYTHONIOENCODING.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 load_dotenv()
 
 
