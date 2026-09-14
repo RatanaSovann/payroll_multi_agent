@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-import anthropic
+from langfuse.anthropic import Anthropic
 from dotenv import load_dotenv
 
 from src.agents import (

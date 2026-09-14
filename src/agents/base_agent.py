@@ -12,6 +12,9 @@ MODEL TIERING (token cost optimization):
 
 import json
 import anthropic
+from langfuse import observe
+from dotenv import load_dotenv
+load_dotenv()
 
 # Shared token ledger across all agents in a pipeline run
 TOKEN_LEDGER = {"input": 0, "output": 0, "calls": 0}
@@ -54,7 +57,7 @@ class BaseAgent:
                 usage.input_tokens  / 1_000_000 * price["in"] +
                 usage.output_tokens / 1_000_000 * price["out"]
             )
-
+    @observe(as_type="generation")
     def call(self, system: str, user_message: str, max_tokens: int = 4096) -> str:
         """Single-turn call — no tools."""
         response = self.client.messages.create(
@@ -65,7 +68,7 @@ class BaseAgent:
         )
         self._track(response)
         return response.content[0].text
-
+    @observe()
     def run_loop(
         self,
         system: str,
